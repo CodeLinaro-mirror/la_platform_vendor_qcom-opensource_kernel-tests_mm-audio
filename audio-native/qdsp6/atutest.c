@@ -43,20 +43,28 @@ enum atu_status{
 	ATU_REPEAT,
 	ATU_STOP_DONE
 };
-#define atu_set_device(device) (-EPERM)
-#define atu_set_rx_volume(rx_vol) (-EPERM)
-#define atu_set_tx_volume(rx_vol) (-EPERM)
-#define atu_start_sound_id(sound_id, repeat_cnt, tone_path, cb_ptr, client_data) (-EPERM)
-#define atu_start_dtmf(f_hi_hz, f_low_hz, tone_duration_ms, tone_path, cb_ptr, client_data) (-EPERM)
-#define atu_stop() (-EPERM)
-#define atu_init() (-EPERM)
-#define atu_dinit() (-EPERM)
+
+int dummy()
+{
+	return (-EPERM);
+}
+
+#define atu_set_device(device) dummy()
+#define atu_set_rx_volume(rx_vol) dummy()
+#define atu_set_tx_volume(rx_vol) dummy()
+#define atu_start_sound_id(sound_id, repeat_cnt, tone_path, cb_ptr, client_data) dummy()
+#define atu_start_dtmf(f_hi_hz, f_low_hz, tone_duration_ms, tone_path, cb_ptr, client_data) dummy()
+#define atu_stop() dummy()
+#define atu_init() dummy()
+#define atu_dinit() dummy()
 #endif
 
 int tone, repeat, device;
 
 void atu_callback_function(enum atu_status status, const void *client_data)
 {
+	/* To remove compiler warning */
+	(void)client_data;
 	printf("ATU status %d \n", status);
 }
 
@@ -68,6 +76,8 @@ void play_tone(int tone_id, unsigned int repeatCnt, unsigned int deviceId)
 	unsigned int device_id = 2;
 	enum atu_path tone_path = ATU_TONE_PATH_BOTH;
 
+	/* To remove compiler warning */
+	(void)tone_path;
 	printf("toneID=%d, deviceId=%d, repeat=%d\n",tone_id, deviceId, repeatCnt);
 
 	atu_init();
@@ -98,7 +108,7 @@ void play_tone(int tone_id, unsigned int repeatCnt, unsigned int deviceId)
 void* atutest_thread(void* arg) {
 	struct audiotest_thread_context *context =
 		(struct audiotest_thread_context*) arg;
-	int ret_val;
+	int ret_val=0;
 
 	play_tone(tone, repeat, device);
 	free_context(context);
@@ -151,6 +161,8 @@ int atutest_read_params(void) {
 int atutest_control_handler(void *private_data)
 {
 	int ret_val = 0;
+	/* To remove compiler warning */
+	(void)private_data;
 	/* Nothing to do */
 	return ret_val;
 }
@@ -158,7 +170,7 @@ int atutest_control_handler(void *private_data)
 const char *atutest_help_txt =
 "Play tone test: toneid, deviceid, repeatcnt \n\
 echo \"playtone -id=xxx -tone=x -device=x -repeat=x\" > /data/audio_test \n\
-tone = tone_id, device = device_id, repeat = repeat count\n\ ";
+tone = tone_id, device = device_id, repeat = repeat count\n ";
 
 void atutest_help_menu(void) {
 	printf("%s\n", atutest_help_txt);

@@ -36,7 +36,7 @@
 #define AUDIOTEST_TEST_MOD_MASTER_MUTE 10
 #define AUDIOTEST_TEST_MOD_ATUTEST 11
 /* If added new module, need to update this number */
-#define AUDIOTEST_MAX_TEST_MOD 12
+#define AUDIOTEST_MAX_TEST_MOD 13
 
 #define false 0
 #define true (!false)

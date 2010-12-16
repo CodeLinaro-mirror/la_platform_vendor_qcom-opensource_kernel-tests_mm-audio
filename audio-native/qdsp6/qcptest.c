@@ -146,7 +146,6 @@ static void create_qcp_header(int Datasize, int Frames, int Format)
 int qcp_rec(struct audtest_config *config)
 {
 
-	struct qcp_header hdr;
 	unsigned char buf[1024];
 	struct msm_audio_evrc_enc_config evrc_cfg;
 	struct msm_audio_qcelp_enc_config qcelp_cfg;
@@ -291,6 +290,8 @@ fail:
 
 static void audiotest_alarm_handler(int sig)
 {
+	/* To remove compiler warning */
+	(void)sig;
 	g_terminate_early = 1;
 	sleep(1);
 }
@@ -309,7 +310,7 @@ void* recqcp_thread(void* arg) {
 
 int qcprec_read_params(void) {
 	struct audiotest_thread_context *context;
-	struct itimerspec ts;
+	struct itimerval ts;
 	char *token;
 	int ret_val = 0;
 
@@ -339,7 +340,7 @@ int qcprec_read_params(void) {
 					audio_data->format = atoi(&token[sizeof("-format=") - 1]);
 				} else if (!memcmp(token,"-timeout=", (sizeof("-timeout=") - 1))) {
 					audio_data->g_rec_timeout = atoi(&token[sizeof("-timeout=") - 1]);
-					memset(&ts, 0, sizeof(struct itimerspec));
+					memset(&ts, 0, sizeof(struct itimerval));
 					printf("setting rec timeout to %d secs\n", audio_data->g_rec_timeout);
 					ts.it_value.tv_sec = audio_data->g_rec_timeout;
 					signal(SIGALRM, audiotest_alarm_handler);
