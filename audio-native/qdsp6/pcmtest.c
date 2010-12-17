@@ -176,7 +176,8 @@ static unsigned avail;
 static int fill_buffer(void *buf, unsigned sz, void *cookie)
 {
 	unsigned cpy_size = (sz < avail?sz:avail);
-
+	/* To remove compiler warning */
+	(void)cookie;
 	if (avail == 0)
 		return -1;
 
@@ -196,7 +197,7 @@ static void play_file(struct audtest_config *config, unsigned rate, unsigned cha
 		fprintf(stderr,"could not allocate %d bytes\n", count);
 		return;
 	}
-	if (read(fd, next, count) != count) {
+	if (read(fd, next, count) != (signed)count) {
 		fprintf(stderr,"could not read %d bytes\n", count);
 		return;
 	}
@@ -362,6 +363,8 @@ fail:
 
 static void audiotest_alarm_handler(int sig)
 {
+	/* To remove compiler warning */
+	(void)sig;
 	g_terminate_early = 1;
 	sleep(1);
 }
@@ -380,7 +383,7 @@ void* playpcm_thread(void* arg) {
 
 int pcmplay_read_params(void) {
 	struct audiotest_thread_context *context;
-	struct itimerspec ts;
+	struct itimerval ts;
 	char *token;
 	int ret_val = 0;
 
@@ -409,7 +412,7 @@ int pcmplay_read_params(void) {
 					audio_data->g_play_buf_size = atoi(&token[sizeof("-playbufsize=") - 1]);
 				} else if (!memcmp(token,"-timeout=", (sizeof("-timeout=") - 1))) {
 					audio_data->g_rec_timeout = atoi(&token[sizeof("-timeout=") - 1]);
-					memset(&ts, 0, sizeof(struct itimerspec));
+					memset(&ts, 0, sizeof(struct itimerval));
 					printf("setting rec timeout to %d secs\n", audio_data->g_rec_timeout);
 					ts.it_value.tv_sec = audio_data->g_rec_timeout;
 					signal(SIGALRM, audiotest_alarm_handler);
@@ -444,7 +447,7 @@ void* recpcm_thread(void* arg) {
 
 int pcmrec_read_params(void) {
 	struct audiotest_thread_context *context;
-	struct itimerspec ts;
+	struct itimerval ts;
 	char *token;
 	int ret_val = 0;
 
@@ -479,7 +482,7 @@ int pcmrec_read_params(void) {
 					context->cxt_id = atoi(&token[sizeof("-id=") - 1]);
 				} else if (!memcmp(token,"-timeout=", (sizeof("-timeout=") - 1))) {
 					audio_data->g_rec_timeout = atoi(&token[sizeof("-timeout=") - 1]);
-					memset(&ts, 0, sizeof(struct itimerspec));
+					memset(&ts, 0, sizeof(struct itimerval));
 					printf("setting rec timeout to %d secs\n", audio_data->g_rec_timeout);
 					ts.it_value.tv_sec = audio_data->g_rec_timeout;
 					signal(SIGALRM, audiotest_alarm_handler);

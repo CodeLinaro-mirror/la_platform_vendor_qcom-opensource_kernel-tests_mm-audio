@@ -99,7 +99,7 @@ static int initiate_play(struct audtest_config *clnt_config, unsigned rate, unsi
              volume = 100;
         }
     }
-    if (write(afd, buf, sz) != sz) {
+    if (write(afd, buf, sz) != (signed)sz) {
       printf(" write return not equal to sz, exit loop\n");
       break;
     } else {
@@ -124,6 +124,8 @@ static unsigned avail;
 static int fill_buffer(void *buf, unsigned sz, void *cookie)
 {
   unsigned cpy_size = (sz < avail?sz:avail);
+  /* To remove compiler warning */
+  (void)cookie;
 
   printf("fill_buffer: avail=%d, next=%p\n",avail,next);
 
@@ -149,7 +151,7 @@ static void play_file(struct audtest_config *config, unsigned rate, unsigned cha
     return;
   }
 
-  if (read(fd, next, count) != count) {
+  if (read(fd, next, count) != (signed)count) {
     fprintf(stderr,"could not read %d bytes\n", count);
     return;
   }
@@ -178,6 +180,8 @@ int mp3_play(struct audtest_config *config)
 
 static void audiotest_alarm_handler(int sig)
 {
+	/* To remove compiler warning */
+	(void)sig;
 	g_terminate_early = 1;
 	sleep(1);
 }
@@ -196,7 +200,7 @@ void* playmp3_thread(void* arg) {
 
 int mp3play_read_params(void) {
 	struct audiotest_thread_context *context;
-	struct itimerspec ts;
+	struct itimerval ts;
 	char *token;
 	int ret_val = 0;
 
@@ -223,7 +227,7 @@ int mp3play_read_params(void) {
 					audio_data->g_test_volume = atoi(&token[sizeof("-volume=") - 1]);
 				} else if (!memcmp(token,"-timeout=", (sizeof("-timeout=") - 1))) {
 					audio_data->g_rec_timeout = atoi(&token[sizeof("-timeout=") - 1]);
-					memset(&ts, 0, sizeof(struct itimerspec));
+					memset(&ts, 0, sizeof(struct itimerval));
 					printf("setting rec timeout to %d secs\n", audio_data->g_rec_timeout);
 					ts.it_value.tv_sec = audio_data->g_rec_timeout;
 					signal(SIGALRM, audiotest_alarm_handler);

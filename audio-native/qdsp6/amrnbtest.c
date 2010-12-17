@@ -129,6 +129,8 @@ static unsigned avail;
 static int fill_buffer(void *buf, unsigned sz, void *cookie)
 {
 	unsigned cpy_size = (sz < avail?sz:avail);
+	/* To remove compiler warning */
+	(void)cookie;
 
 	printf("fill_buffer: avail=%d, next=%p\n",avail,next);
 	if (avail == 0) {
@@ -150,7 +152,7 @@ static void play_amr_file(struct audtest_config *config, unsigned rate, unsigned
 		fprintf(stderr,"could not allocate %d bytes\n", count);
 		return;
 	}
-	if (read(fd, next, count) != count) {
+	if (read(fd, next, count) != (signed)count) {
 		fprintf(stderr,"could not read %d bytes\n", count);
 		//return;
 	}
@@ -186,10 +188,8 @@ int amrnb_rec(struct audtest_config *config)
         struct msm_audio_stream_config amrnb_str_cfg;
         struct msm_audio_amrnb_enc_config_v2 amrnb_cfg;
 	struct msm_voicerec_mode voicerec_mode;
-	struct audio_pvt_data *audio_data = (struct audio_pvt_data *) config->private_data;
 	unsigned sz ,framesize = 0;
 	int fd, afd;
-	unsigned char tmp;
 	static unsigned int cnt = 0;
 
 	fd = open(config->file_name, O_CREAT | O_RDWR, 0666);
@@ -249,12 +249,11 @@ int amrnb_rec(struct audtest_config *config)
 		framesize = read(afd, buf, sz);
 
 		printf("AMR decoded frame num = %d , size = %d \n",++cnt,framesize);
-		if(write(fd, buf, framesize) != framesize) {
+		if(write(fd, buf, framesize) != (signed)framesize) {
 			perror("cannot write buffer");
 			goto fail;
 		}
 	}
-done:
 	close(afd);
 
 
@@ -270,6 +269,8 @@ fail:
 
 static void audiotest_alarm_handler(int sig)
 {
+	/* To remove compiler warning */
+	(void)sig;
 	g_terminate_early = 1;
 	sleep(1);
 }
@@ -288,7 +289,7 @@ void* playamrnb_thread(void* arg) {
 
 int amrnbplay_read_params(void) {
 	struct audiotest_thread_context *context;
-	struct itimerspec ts;
+	struct itimerval ts;
 	char *token;
 	int ret_val = 0;
 
@@ -315,7 +316,7 @@ int amrnbplay_read_params(void) {
 					audio_data->g_test_volume = atoi(&token[sizeof("-volume=") - 1]);
 				} else if (!memcmp(token,"-timeout=", (sizeof("-timeout=") - 1))) {
 					audio_data->g_rec_timeout = atoi(&token[sizeof("-timeout=") - 1]);
-					memset(&ts, 0, sizeof(struct itimerspec));
+					memset(&ts, 0, sizeof(struct itimerval));
 					printf("setting rec timeout to %d secs\n", audio_data->g_rec_timeout);
 					ts.it_value.tv_sec = audio_data->g_rec_timeout;
 					signal(SIGALRM, audiotest_alarm_handler);
@@ -348,7 +349,7 @@ void* recamrnb_thread(void* arg) {
 
 int amrnbrec_read_params(void) {
 	struct audiotest_thread_context *context;
-	struct itimerspec ts;
+	struct itimerval ts;
 	char *token;
 	int ret_val = 0;
 
@@ -372,7 +373,7 @@ int amrnbrec_read_params(void) {
 					context->cxt_id = atoi(&token[sizeof("-id=") - 1]);
 				} else if (!memcmp(token,"-timeout=", (sizeof("-timeout=") - 1))) {
 					audio_data->g_rec_timeout = atoi(&token[sizeof("-timeout=") - 1]);
-					memset(&ts, 0, sizeof(struct itimerspec));
+					memset(&ts, 0, sizeof(struct itimerval));
 					printf("setting rec timeout to %d secs\n", audio_data->g_rec_timeout);
 					ts.it_value.tv_sec = audio_data->g_rec_timeout;
 					signal(SIGALRM, audiotest_alarm_handler);
