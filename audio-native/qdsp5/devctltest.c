@@ -72,8 +72,11 @@ Usage: echo \"devctl -cmd=dev_switch_rx -dev_id=x\" > /data/audio_test	\n\
 	echo \"devctl -cmd=disable_dev -dev_id=x\" > /data/audio_test	\n\
 	echo \"devctl -cmd=disable_dev -dev_id=y\" > /data/audio_test	\n\
 where x,y = any of the supported device IDs listed below,           	\n\
-z = 0/1 where 0 is unmute, 1 is mute 				    	\n\
-Note:                                                               	\n\
+z = 0/1 where 0 is unmute, 1 is mute 				    	\n"
+#ifdef QDSP5V2
+"	echo \"devctl -cmd=mute_dev -dev_id=x -mute=0/1\" > /data/audio_test\n"
+#endif
+"Note:                                                               	\n\
 (i)   Handset RX/TX is set as default device for all playbacks/recordings \n\
 (ii)  After a device switch, audio will be routed to the last set   	\n\
       device                                                        	\n\
@@ -298,7 +301,7 @@ int devmgr_devctl_handler()
 
 	char *token;
 	int ret_val = 0, sid, dev_cnt, dev_source, dev_dest, index, dev_id,
-		txdev_id, rxdev_id;
+		mute, txdev_id, rxdev_id;
 
 	token = strtok(NULL, " ");
 
@@ -418,6 +421,21 @@ int devmgr_devctl_handler()
 							("-sid=") - 1]);
 						msm_route_stream
 							(DIR_RX, sid, dev_id, 1);
+					}
+				}
+			} else if (!strcmp(token, "mute_dev")) {
+				token = strtok(NULL, " ");
+				if (!memcmp(token, "-dev_id=", (sizeof
+					("-dev_id=") - 1))) {
+					dev_id = atoi(&token[sizeof("-dev_id=")
+									- 1]);
+					token = strtok(NULL, " ");
+					if (!memcmp(token, "-mute=", (sizeof
+							("-mute=") - 1))) {
+						mute = atoi(&token[sizeof
+							("-mute=") - 1]);
+						msm_device_mute
+							(dev_id, mute);
 					}
 				}
 			} else if (!strcmp(token, "tx_route")) {
