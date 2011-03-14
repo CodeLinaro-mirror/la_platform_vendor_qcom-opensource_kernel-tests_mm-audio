@@ -89,7 +89,11 @@ z = 0/1 where 0 is unmute, 1 is mute 				    	\n"
 where v = ANC Device ID							\n\
 If ANC Device is already enabled, then just run the enable_anc command  \n\
 	To disable active noise cancellation:				\n\
-	echo \"devctl -cmd=disable_anc\" > /data/audio_test		\n"
+	echo \"devctl -cmd=disable_anc\" > /data/audio_test		\n\
+	echo \"devctl -cmd=loopback_set -txdev_id=x -rxdev_id=y\" >     \n\
+	/data/audio_test                                                \n\
+	echo \"devctl -cmd=loopback_reset -txdev_id=x -rxdev_id=y\" >   \n\
+	/data/audio_test                                                \n"
 #endif
 "Note:                                                               	\n\
 (i)   Handset RX/TX is set as default device for all playbacks/recordings \n\
@@ -563,7 +567,39 @@ int devmgr_devctl_handler()
 				device = msm_get_device(anc_device);
 				ret_val = msm_enable_anc(device, 0);
 				printf("Returned from disabling anc %d\n", ret_val);
-			}
+			} else if (!strcmp(token, "loopback_set")) {
+				printf("Loopback Set\n");
+				token = strtok(NULL, " ");
+				if (!memcmp(token, "-txdev_id=", (sizeof
+							("-txdev_id=") - 1))) {
+					txdev_id = atoi(&token[sizeof
+							("-txdev_id=") - 1]);
+					token = strtok(NULL, " ");
+					if (!memcmp(token, "-rxdev_id=",
+						(sizeof("-rxdev_id=") - 1))) {
+						rxdev_id = atoi(&token[sizeof
+							("-rxdev_id=") - 1]);
+						msm_snd_dev_loopback
+							(rxdev_id, txdev_id, 1);
+					}
+				}
+                        } else if (!strcmp(token, "loopback_reset")) {
+				printf("Loopback Reset\n");
+				token = strtok(NULL, " ");
+				if (!memcmp(token, "-txdev_id=", (sizeof
+							("-txdev_id=") - 1))) {
+					txdev_id = atoi(&token[sizeof
+							("-txdev_id=") - 1]);
+					token = strtok(NULL, " ");
+					if (!memcmp(token, "-rxdev_id=",
+						(sizeof("-rxdev_id=") - 1))) {
+						rxdev_id = atoi(&token[sizeof
+							("-rxdev_id=") - 1]);
+						msm_snd_dev_loopback
+							(rxdev_id, txdev_id, 0);
+					}
+				}
+                        }
 #endif
 			else {
 				printf("%s: Invalid command", __func__);
