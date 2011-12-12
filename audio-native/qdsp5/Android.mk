@@ -30,6 +30,10 @@ ifeq "$(findstring msm8660,$(QCOM_TARGET_PRODUCT))" "msm8660"
 mm-audio-native-def += -DQDSP6V2
 endif
 
+ifeq ($(call is-board-platform,msm7k),true)
+mm-audio-native-def += -DAUDIO7X27A
+endif
+
 # ---------------------------------------------------------------------------------
 #                       Make the apps-test (mm-audio-native-test)
 # ---------------------------------------------------------------------------------
@@ -89,6 +93,10 @@ ifeq "$(findstring msm8660,$(QCOM_TARGET_PRODUCT))" "msm8660"
 LOCAL_SRC_FILES += mvstest.c
 LOCAL_SRC_FILES += hdmi_ac3.c
 endif
+endif
+else
+ifeq ($(call is-board-platform,msm7k),true)
+LOCAL_SRC_FILES += fm_test.c
 endif
 endif
 
