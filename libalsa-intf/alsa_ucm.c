@@ -568,7 +568,7 @@ int snd_use_case_apply_mixer_controls(snd_use_case_mgr_t *uc_mgr,
             ret = -ENODEV;
         } else {
             LOGD("Set mixer controls for %s enable %d", use_case, enable);
-            if (uc_mgr->card_ctxt_ptr->use_case_verb_list[verb_index].card_ctrl[use_case_index].acdb_id &&
+            if ((uc_mgr->card_ctxt_ptr->use_case_verb_list[verb_index].card_ctrl[use_case_index].acdb_id >= 0) &&
                 uc_mgr->card_ctxt_ptr->use_case_verb_list[verb_index].card_ctrl[use_case_index].capability) {
                 /*TODO: Check for voice call use case or modifier and set voice calibration*/
                 if (enable) {
