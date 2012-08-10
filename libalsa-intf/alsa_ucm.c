@@ -788,7 +788,7 @@ const char *use_case, int enable, int ctrl_list_type, int uc_index)
                 (check_devices_for_voice_call(uc_mgr, use_case) != NULL))
                 return ret;
             LOGD("Set mixer controls for %s enable %d", use_case, enable);
-            if (ctrl_list[uc_index].acdb_id && ctrl_list[uc_index].capability) {
+            if ((ctrl_list[uc_index].acdb_id >= 0) && ctrl_list[uc_index].capability) {
                 if (enable) {
                     snd_use_case_apply_voice_acdb(uc_mgr, uc_index);
                     LOGD("acdb_id %d cap %d enable %d",
