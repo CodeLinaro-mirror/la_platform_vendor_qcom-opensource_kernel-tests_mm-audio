@@ -180,6 +180,16 @@ static int process_cmd(char *cmdStr)
     command = strtok_r(cmdStr, " ", &value);
     identifier = strtok_r(NULL, " ", &value);
 
+    if (command == NULL) {
+        fprintf(stderr, "command is NULL\n");
+        return -EINVAL;
+    }
+
+    if (identifier == NULL) {
+        fprintf(stderr, "identifier is NULL\n");
+        return -EINVAL;
+    }
+
     for (cmd = cmds; cmd->cmd_str != NULL; cmd++) {
         if (strncmp(cmd->cmd_str, command, strlen(cmd->cmd_str)) == 0)
             break;
@@ -295,7 +305,8 @@ static int process_cmd(char *cmdStr)
             fprintf(stderr, "%s: error failed to get %s: %d\n", cmd->cmd_str, identifier, err);
             return err;
         }
-        printf("  %s=%s\n", identifier, str);
+        if (str != NULL)
+            printf("  %s=%s\n", identifier, str);
         free((void *)str);
         break;
 
