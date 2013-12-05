@@ -519,6 +519,7 @@ int main(int argc, char **argv)
     char *device = "hw:0,0";
     struct sigaction sa;
     int rc = 0;
+    char *cformat = NULL;
 
     if (argc < 2) {
           printf("\nUsage: arec [options] <file>\n"
@@ -533,9 +534,11 @@ int main(int argc, char **argv)
 		"-F             -- Format\n"
                 "-B             -- Period\n"
                 "<file> \n");
-           for (i = 0; i < SNDRV_PCM_FORMAT_LAST; ++i)
-               if (get_format_name(i))
-                   fprintf(stderr, "%s ", get_format_name(i));
+           for (i = 0; i < SNDRV_PCM_FORMAT_LAST; ++i) {
+                cformat = get_format_name(i);
+               if (cformat != NULL)
+                   fprintf(stderr, "%s ", cformat);
+           }
            fprintf(stderr, "\nSome of these may not be available on selected hardware\n");
           return 0;
     }
@@ -581,9 +584,11 @@ int main(int argc, char **argv)
 		"-F             -- Format\n"
                 "-B             -- Period\n"
                 "<file> \n");
-           for (i = 0; i < SNDRV_PCM_FORMAT_LAST; ++i)
-               if (get_format_name(i))
-                   fprintf(stderr, "%s ", get_format_name(i));
+           for (i = 0; i < SNDRV_PCM_FORMAT_LAST; ++i) {
+                cformat = get_format_name(i);
+               if (cformat != NULL)
+                   fprintf(stderr, "%s ", cformat);
+           }
            fprintf(stderr, "\nSome of these may not be available on selected hardware\n");
           return -EINVAL;
        }
@@ -605,7 +610,7 @@ int main(int argc, char **argv)
     sigaction(SIGABRT, &sa, NULL);
 
     if (pcm_flag) {
-	 if (format == SNDRV_PCM_FORMAT_S16_LE)
+        if (format == SNDRV_PCM_FORMAT_S16_LE)
              rc = rec_wav(mmap, device, rate, ch, filename);
          else
              rc = rec_raw(mmap, device, rate, ch, filename);
