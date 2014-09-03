@@ -34,8 +34,11 @@ dist_libalsa_intf_DATA    = snd_soc_msm/snd_soc_msm \
                             snd_soc_msm/snd_soc_msm_8x10_wcd_skuab \
                             snd_soc_msm/snd_soc_msm_Tapan \
                             snd_soc_msm/snd_soc_msm_TapanLite \
-                            snd_soc_msm/snd_soc_msm_Tapan_SKUF
-
+                            snd_soc_msm/snd_soc_msm_Tapan_SKUF \
+                            snd_soc_msm/snd_soc_msm_Taiko \
+                            snd_soc_msm/snd_soc_msm_Taiko_CDP \
+                            snd_soc_msm/snd_soc_msm_Taiko_Fluid \
+                            snd_soc_msm/snd_soc_msm_Taiko_liquid
 if USE_QCOM_ACDB
 libalsa_intf_la_CFLAGS = $(AM_CFLAGS) -DUSE_GLIB @GLIB_CFLAGS@ -DCONFIG_DIR=\"/etc/snd_soc_msm/\"
 libalsa_intf_la_CPPFLAGS = $(AM_CPPFLAGS) $(ACDBLOADER_CFLAGS) -DQC_PROP -DUSE_GLIB @GLIB_CFLAGS@

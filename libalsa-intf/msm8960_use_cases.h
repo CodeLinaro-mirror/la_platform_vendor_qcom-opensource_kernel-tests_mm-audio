@@ -192,6 +192,10 @@ static const char *card_list[] = {
     "snd_soc_msm_Tapan",
     "snd_soc_msm_TapanLite",
     "snd_soc_msm_Tapan_SKUF",
+    "snd_soc_msm_Taiko",
+    "snd_soc_msm_Taiko_CDP",
+    "snd_soc_msm_Taiko_Fluid",
+    "snd_soc_msm_Taiko_liquid",
 };
 
 typedef struct card_mapping {
@@ -213,6 +217,11 @@ static card_mapping_t card_mapping_list[] = {
     {"snd_soc_msm_Tapan", 0},
     {"snd_soc_msm_TapanLite", 0},
     {"snd_soc_msm_Tapan_SKUF", 0},
+    {"snd_soc_msm_Taiko", 0},
+    {"snd_soc_msm_Taiko_CDP", 0},
+    {"snd_soc_msm_Taiko_Fluid", 0},
+    {"snd_soc_msm_Taiko_liquid", 0},
+
 };
 
 /* New use cases, devices and modifiers added
