@@ -195,6 +195,7 @@ static const char *card_list[] = {
     "snd_soc_msm_9x07_Tomtom_I2S",
     "snd_soc_msm_9x40_Tomtom_I2S",
     "snd_soc_msm_Tasha_I2S",
+    "snd_soc_msm_Tavil_I2S",
 };
 
 typedef struct card_mapping {
@@ -219,6 +220,7 @@ static card_mapping_t card_mapping_list[] = {
     {"snd_soc_msm_9x07_Tomtom_I2S", 0},
     {"snd_soc_msm_9x40_Tomtom_I2S", 0},
     {"snd_soc_msm_Tasha_I2S", 0},
+    {"snd_soc_msm_Tavil_I2S", 0},
 };
 
 /* New use cases, devices and modifiers added
