@@ -550,27 +550,25 @@ int mixer_ctl_mulvalues(struct mixer_ctl *ctl, int count, char ** argv)
         ALOGV("can't find control\n");
         return -1;
     }
-    if (count > ctl->info->count) {
-        count = ctl->info->count;
-        ALOGV("count doesn't match %d\n", ctl->info->count);
-    }
+    if (count < ctl->info->count || count > ctl->info->count)
+        return -EINVAL;
 
     memset(&ev, 0, sizeof(ev));
     ev.id.numid = ctl->info->id.numid;
     switch (ctl->info->type) {
     case SNDRV_CTL_ELEM_TYPE_BOOLEAN:
-        for (n = 0; n < count; n++)
+        for (n = 0; n < ctl->info->count; n++)
             ev.value.integer.value[n] = !!atoi(argv[n]);
         break;
     case SNDRV_CTL_ELEM_TYPE_INTEGER: {
-        for (n = 0; n < count; n++) {
+        for (n = 0; n < ctl->info->count; n++) {
              fprintf( stderr, "Value: %d idx:%d\n", atoi(argv[n]), n);
              ev.value.integer.value[n] = atoi(argv[n]);
         }
         break;
     }
     case SNDRV_CTL_ELEM_TYPE_INTEGER64: {
-        for (n = 0; n < count; n++) {
+        for (n = 0; n < ctl->info->count; n++) {
              long long value_ll = scale_int64(ctl->info, atoi(argv[n]));
              fprintf( stderr, "ll_value = %lld\n", value_ll);
              ev.value.integer64.value[n] = value_ll;
@@ -578,7 +576,7 @@ int mixer_ctl_mulvalues(struct mixer_ctl *ctl, int count, char ** argv)
         break;
     }
     case SNDRV_CTL_ELEM_TYPE_ENUMERATED: {
-        for (n = 0; n < count; n++) {
+        for (n = 0; n < ctl->info->count; n++) {
             fprintf( stderr, "Value: %d idx:%d\n", atoi(argv[n]), n);
             ev.value.enumerated.item[n] = (unsigned int)atoi(argv[n]);
         }
