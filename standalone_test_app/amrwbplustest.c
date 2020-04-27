@@ -112,7 +112,6 @@ typedef struct TIMESTAMP{
 } __attribute__ ((packed)) TIMESTAMP;
 
 struct meta_in_q6{
-	unsigned char rsv[18];
 	unsigned short offset;
 	TIMESTAMP ntimestamp;
 	unsigned int nflags;
@@ -128,7 +127,6 @@ struct meta_out_dsp{
 } __attribute__ ((packed));
 
 struct dec_meta_out{
-	unsigned int rsv[7];
 	unsigned int num_of_frames;
 	struct meta_out_dsp meta_out_dsp[];
 } __attribute__ ((packed));
@@ -520,6 +518,7 @@ static void *amrwbplus_dec_event(void *arg)
 	int afd = audio_data->afd, rc;
 	struct msm_audio_event event;
 	int eof = 0;
+	int ret = 0;
 	struct dec_meta_out *meta_out_ptr;
 	struct meta_out_dsp *meta_out_dsp;
 	struct meta_in_q6 *meta_in_ptr;
@@ -527,8 +526,10 @@ static void *amrwbplus_dec_event(void *arg)
 	pthread_t evt_write_thread;
 
 	eos_ack = 0;
-	if (audio_data->mode) // Non Tunnel mode
+	if (audio_data->mode) { // Non Tunnel mode
 		pthread_create(&evt_read_thread, NULL, amrwbplus_read_thread, (void *) audio_data);
+		ret = 1;
+	}
 	pthread_create(&evt_write_thread, NULL, amrwbplus_write_thread, (void *) audio_data);
 	// Till EOF not reached in NT or till eos not reached in tunnel
 	while((!eof && audio_data->mode) || (!eos_ack && !audio_data->mode)) {
@@ -585,7 +586,7 @@ static void *amrwbplus_dec_event(void *arg)
 				break;
 		}
 	}
-	if(audio_data->mode)
+	if(audio_data->mode && ret == 1)
 		pthread_join(evt_read_thread, NULL);
 	else
 		pthread_join(evt_write_thread, NULL);
@@ -819,7 +820,7 @@ static int play_file(struct audtest_config *config, int fd, unsigned count)
 	char *content_buf;
 
 	audio_data->next = (char *)malloc(count);
-	printf(" play_file: count=%d,next=%s\n", count, audio_data->next);
+	printf(" play_file: count=%d\n", count);
 	if (!audio_data->next) {
 		fprintf(stderr, "could not allocate %d bytes\n", count);
 		return -1;
@@ -894,6 +895,10 @@ int amrwbplusplay_read_params(void* filedata)
 			(sizeof(struct audio_pvt_data));
 			printf("Created audio instance 0x%8x\n",
 					(unsigned int) audio_data);
+			if(!audio_data) {
+				ret_val = -1;
+				return ret_val;
+			}
 			memset(audio_data, 0, sizeof(struct audio_pvt_data));
 			audio_data->repeat = 0;
 			audio_data->quit = 0;

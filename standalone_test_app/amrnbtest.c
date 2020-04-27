@@ -108,7 +108,6 @@ typedef struct TIMESTAMP{
 } __attribute__ ((packed)) TIMESTAMP;
 
 struct meta_in_q6{
-	unsigned char rsv[18];
 	unsigned short offset;
 	TIMESTAMP ntimestamp;
 	unsigned int nflags;
@@ -124,7 +123,6 @@ struct meta_out_dsp{
 } __attribute__ ((packed));
 
 struct dec_meta_out{
-	unsigned int rsv[7];
 	unsigned int num_of_frames;
 	struct meta_out_dsp meta_out_dsp[];
 } __attribute__ ((packed));
@@ -523,6 +521,7 @@ static void *amrnb_dec_event(void *arg)
 	int afd = audio_data->afd, rc;
 	struct msm_audio_event event;
 	int eof = 0;
+	int ret = 0;
 	struct dec_meta_out *meta_out_ptr;
 	struct meta_out_dsp *meta_out_dsp;
 	struct meta_in_q6 *meta_in_ptr;
@@ -530,8 +529,10 @@ static void *amrnb_dec_event(void *arg)
 	pthread_t evt_write_thread;
 
 	eos_ack = 0;
-	if (audio_data->mode) // Non Tunnel mode
+	if (audio_data->mode) { // Non Tunnel mode
 		pthread_create(&evt_read_thread, NULL, amrnb_read_thread, (void *) audio_data);
+		ret = 1;
+	}
 	pthread_create(&evt_write_thread, NULL, amrnb_write_thread, (void *) audio_data);
 	// Till EOF not reached in NT or till eos not reached in tunnel
 	while((!eof && audio_data->mode) || (!eos_ack && !audio_data->mode)) {
@@ -588,7 +589,7 @@ static void *amrnb_dec_event(void *arg)
 				break;
 		}
 	}
-	if(audio_data->mode)
+	if(audio_data->mode && ret == 1)
 		pthread_join(evt_read_thread, NULL);
 	else
 		pthread_join(evt_write_thread, NULL);
@@ -820,7 +821,7 @@ static int play_amr_file(struct audtest_config *config, int fd, size_t count)
 
 	audio_data->next = (char*)malloc(count);
 
-	printf(" play_file: count=%d,next=%p\n", count, audio_data->next);
+	printf(" play_file: count=%d\n", count);
 
 	if (!audio_data->next) {
 		fprintf(stderr,"could not allocate %d bytes\n", count);
@@ -890,17 +891,24 @@ int amrnbplay_read_params(void* filedata) {
 	struct audiotest_thread_context *context;
 	struct audio_pvt_data *audio_data;
 	audio_data = (struct audio_pvt_data *) malloc(sizeof(struct audio_pvt_data));
-    stream_config *params = (stream_config*) filedata;
+        stream_config *params = (stream_config*) filedata;
 
 	int ret_val = 0;
 
-	if ((context = get_free_context()) == NULL)
+	if ((context = get_free_context()) == NULL) {
 		ret_val = -1;
+		return ret_val;
+	}
+        fprintf(stderr, "start of amrnbplay_read_params \n");
 
-	fprintf(stderr, "start of amrnbplay_read_params \n");
+	if(!audio_data) {
+	ret_val = -1;
+	return ret_val;
+	}
 
     context->config.file_name = params->inputfilename;
-    audio_data->outfile = params->outputfilename;
+	audio_data->outfile = params->outputfilename;
+
     out_size = 8192;
     in_size = 320;
 
