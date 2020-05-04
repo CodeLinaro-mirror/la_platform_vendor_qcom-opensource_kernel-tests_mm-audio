@@ -1,6 +1,6 @@
 /*
 ** Copyright 2010, The Android Open-Source Project
-** Copyright (c) 2011-2014, The Linux Foundation. All rights reserved.
+** Copyright (c) 2011-2014, 2020 The Linux Foundation. All rights reserved.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -665,7 +665,9 @@ int mixer_ctl_set(struct mixer_ctl *ctl, unsigned percent)
     case SNDRV_CTL_ELEM_TYPE_IEC958: {
         struct snd_aes_iec958 *iec958;
         iec958 = (struct snd_aes_iec958 *)percent;
-        memcpy(ev.value.iec958.status,iec958->status,SPDIF_CHANNEL_STATUS_SIZE);
+        if (iec958 != NULL) {
+            memcpy(ev.value.iec958.status,iec958->status,SPDIF_CHANNEL_STATUS_SIZE);
+        }
         break;
     }
     default:

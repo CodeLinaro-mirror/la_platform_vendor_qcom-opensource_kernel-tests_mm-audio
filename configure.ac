@@ -54,6 +54,15 @@ fi
 
 AM_CONDITIONAL(USE_GLIB, test "x${with_glib}" = "xyes")
 
+AC_ARG_WITH([ion],
+      AC_HELP_STRING([--with-ion],
+          [enable ion package, specify ion headers location]),
+                [CPPFLAGS="$CPPFLAGS -I$withval"] [ION_ENABLE=yes],
+          [ION_ENABLE=no])
+
+AM_CONDITIONAL([USE_LIBION_LIBRARY],[test x$ION_ENABLE = xyes])
+
+
 AC_ARG_WITH([acdb],
       AC_HELP_STRING([--with-acdb],
          [enable alsa-intf with acdbloader. Use this when building alsa-intf with acdbloader.]))
@@ -71,6 +80,7 @@ AC_SUBST([CC])
 AC_CONFIG_FILES([ \
         Makefile \
         libalsa-intf/Makefile \
+        standalone_test_app/Makefile \
         alsa-intf.pc
         ])
 AC_OUTPUT

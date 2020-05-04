@@ -1,6 +1,6 @@
 /*
 ** Copyright 2010, The Android Open-Source Project
-** Copyright (c) 2011-2013, 2015 The Linux Foundation. All rights reserved.
+** Copyright (c) 2011-2013, 2015, 2020 The Linux Foundation. All rights reserved.
 **
 ** Licensed under the Apache License, Version 2.0 (the "License");
 ** you may not use this file except in compliance with the License.
@@ -146,6 +146,12 @@ enum decoder_alias {
     FORMAT_AMRWB            = SND_AUDIOCODEC_AMRWB,
     FORMAT_AMRWB_PLUS       = SND_AUDIOCODEC_AMRWBPLUS
 };
+
+typedef enum card_status_t {
+    CARD_STATUS_ERR,
+    CARD_STATUS_OFFLINE,
+    CARD_STATUS_ONLINE,
+} card_status_t;
 
 int get_compressed_format(const char *format)
 {
@@ -848,11 +854,103 @@ static int disable_timer(struct pcm *pcm) {
      return close(pcm->timer_fd);
 }
 
+card_status_t on_sndcard_state_update(int card_no, int fd)
+{
+    char rd_buf[9]={0};
+    char path[128] = {0};
+
+    snprintf(path, sizeof(path), "/proc/asound/card%d/state", card_no);
+
+
+    if (read(fd, rd_buf, 8) <= 0)
+        return -1;
+
+    rd_buf[8] = '\0';
+    lseek(fd, 0, SEEK_SET);
+
+    ALOGV("card num %d, new state %s", card_no, rd_buf);
+
+    if (strstr(rd_buf, "OFFLINE"))
+        return CARD_STATUS_OFFLINE;
+    else if (strstr(rd_buf, "ONLINE"))
+        return CARD_STATUS_ONLINE;
+    else {
+        ALOGE("unknown state");
+        return CARD_STATUS_ERR;
+    }
+}
+
+int wait_for_online(struct pcm *pcm)
+{
+    card_status_t status;
+    int fd = -1;
+    char path[128] = {0};
+    int ret = 0;
+
+    snprintf(path, sizeof(path), "/proc/asound/card%d/state", pcm->card_no);
+
+    fd = open(path, O_RDONLY);
+    if (fd == -1) {
+            ALOGE("Open %s failed : %s", path, strerror(errno));
+            return -ENODEV;
+    }
+
+retry:
+    status = on_sndcard_state_update(pcm->card_no, fd);
+
+    switch (status) {
+    case CARD_STATUS_ONLINE:
+         ret = 0;
+         goto exit;
+    case CARD_STATUS_OFFLINE:
+        {
+            ALOGV("Start threadLoop()");
+            struct pollfd *pfd = (struct pollfd *)calloc(sizeof(struct pollfd), 1);
+            if (!pfd) {
+                ret = -ENOMEM;
+                break;
+            }
+
+            pfd[0].fd = fd;
+            pfd[0].events = POLLPRI|POLLIN;
+
+            while (1) {
+                if (poll(pfd, 1, -1) < 0) {
+                    ret = errno;
+                    ALOGE("poll() failed w/ err %s", strerror(ret));
+                    switch (ret) {
+                        case EINTR:
+                        case ENOMEM:
+                            sleep(2);
+                            continue;
+                        default:
+                            break;
+                    }
+                }
+                ALOGV("out of poll()");
+                break;
+            }
+            free(pfd);
+            goto retry;
+        }
+        break;
+    case CARD_STATUS_ERR:
+    default:
+         ret = -ENODEV;
+         goto exit;
+
+    }
+exit:
+    close(fd);
+    return ret;
+}
+
 int pcm_close(struct pcm *pcm)
 {
     if (pcm == &bad_pcm)
         return 0;
 
+    wait_for_online(pcm);
     if (pcm->flags & PCM_MMAP) {
         disable_timer(pcm);
         if (ioctl(pcm->fd, SNDRV_PCM_IOCTL_DROP) < 0) {

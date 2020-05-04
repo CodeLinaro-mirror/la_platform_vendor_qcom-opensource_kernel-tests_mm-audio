@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2011-2015, 2020 The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -116,9 +116,13 @@ int snd_use_case_get_list(snd_use_case_mgr_t *uc_mgr,
         return ((int)MAX_NUM_CARDS);
     }
 
+    if (uc_mgr->card_ctxt_ptr == NULL){
+        return -EINVAL;
+    }
+
     pthread_mutex_lock(&uc_mgr->card_ctxt_ptr->card_lock);
     if ((uc_mgr->snd_card_index >= (int)MAX_NUM_CARDS) ||
-        (uc_mgr->snd_card_index < 0) || (uc_mgr->card_ctxt_ptr == NULL)) {
+        (uc_mgr->snd_card_index < 0)) {
         ALOGE("snd_use_case_get_list(): failed, invalid arguments");
         pthread_mutex_unlock(&uc_mgr->card_ctxt_ptr->card_lock);
         return -EINVAL;
@@ -271,9 +275,13 @@ int snd_use_case_get(snd_use_case_mgr_t *uc_mgr,
     char ident[MAX_STR_LEN], *ident1, *ident2, *temp_ptr;
     int index, verb_index = 0, ret = 0;
 
+    if (uc_mgr->card_ctxt_ptr == NULL){
+        return -EINVAL;
+    }
+
     pthread_mutex_lock(&uc_mgr->card_ctxt_ptr->card_lock);
     if ((uc_mgr->snd_card_index >= (int)MAX_NUM_CARDS) ||
-        (uc_mgr->snd_card_index < 0) || (uc_mgr->card_ctxt_ptr == NULL)) {
+        (uc_mgr->snd_card_index < 0)) {
         ALOGE("snd_use_case_get(): failed, invalid arguments");
         pthread_mutex_unlock(&uc_mgr->card_ctxt_ptr->card_lock);
         return -EINVAL;
@@ -506,9 +514,13 @@ int snd_use_case_geti(snd_use_case_mgr_t *uc_mgr,
     char ident[MAX_STR_LEN], *ident1, *ident2, *ident_value, *temp_ptr;
     int index, list_size, ret = -EINVAL;
 
+    if (uc_mgr->card_ctxt_ptr == NULL){
+         return -EINVAL;
+    }
+
     pthread_mutex_lock(&uc_mgr->card_ctxt_ptr->card_lock);
     if ((uc_mgr->snd_card_index >= (int)MAX_NUM_CARDS) ||
-        (uc_mgr->snd_card_index < 0) || (uc_mgr->card_ctxt_ptr == NULL)) {
+        (uc_mgr->snd_card_index < 0)) {
         ALOGE("snd_use_case_geti(): failed, invalid arguments");
         pthread_mutex_unlock(&uc_mgr->card_ctxt_ptr->card_lock);
         return -EINVAL;
@@ -1528,9 +1540,13 @@ int snd_use_case_set(snd_use_case_mgr_t *uc_mgr,
     char ident[MAX_STR_LEN], *ident1, *ident2, *temp_ptr;
     int verb_index, list_size, index = 0, ret = -EINVAL;
 
+    if (uc_mgr->card_ctxt_ptr == NULL){
+        return -EINVAL;
+    }
+
     pthread_mutex_lock(&uc_mgr->card_ctxt_ptr->card_lock);
     if ((uc_mgr->snd_card_index >= (int)MAX_NUM_CARDS) || (value == NULL) ||
-        (uc_mgr->snd_card_index < 0) || (uc_mgr->card_ctxt_ptr == NULL) ||
+        (uc_mgr->snd_card_index < 0) ||
         (identifier == NULL)) {
         ALOGE("snd_use_case_set(): failed, invalid arguments");
         pthread_mutex_unlock(&uc_mgr->card_ctxt_ptr->card_lock);
@@ -1760,9 +1776,13 @@ int snd_use_case_set_case(snd_use_case_mgr_t *uc_mgr,
     char ident[MAX_STR_LEN], *ident1, *ident2, *temp_ptr;
     int verb_index, list_size, index = 0, ret = -EINVAL;
 
+    if (uc_mgr->card_ctxt_ptr == NULL){
+        return -EINVAL;
+    }
+
     pthread_mutex_lock(&uc_mgr->card_ctxt_ptr->card_lock);
     if ((uc_mgr->snd_card_index >= (int)MAX_NUM_CARDS) || (value == NULL) ||
-        (uc_mgr->snd_card_index < 0) || (uc_mgr->card_ctxt_ptr == NULL) ||
+        (uc_mgr->snd_card_index < 0) ||
         (identifier == NULL)) {
         ALOGE("snd_use_case_set_case(): failed, invalid arguments");
         pthread_mutex_unlock(&uc_mgr->card_ctxt_ptr->card_lock);
@@ -2190,9 +2210,14 @@ int snd_use_case_mgr_reset(snd_use_case_mgr_t *uc_mgr)
     int index, list_size, ret = 0;
 
     ALOGV("snd_use_case_reset(): instance %p", uc_mgr);
+
+    if (uc_mgr->card_ctxt_ptr == NULL){
+        return -EINVAL;
+    }
+
     pthread_mutex_lock(&uc_mgr->card_ctxt_ptr->card_lock);
     if ((uc_mgr->snd_card_index >= (int)MAX_NUM_CARDS) ||
-        (uc_mgr->snd_card_index < 0) || (uc_mgr->card_ctxt_ptr == NULL)) {
+        (uc_mgr->snd_card_index < 0)) {
         ALOGE("snd_use_case_mgr_reset(): failed, invalid arguments");
         pthread_mutex_unlock(&uc_mgr->card_ctxt_ptr->card_lock);
         return -EINVAL;

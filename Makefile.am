@@ -2,7 +2,7 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = libalsa-intf
+SUBDIRS = libalsa-intf standalone_test_app
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = alsa-intf.pc
