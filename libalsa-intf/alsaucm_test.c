@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2012, 2014, 2021, The Linux Foundation. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -91,6 +91,13 @@ static struct cmd cmds[] = {
     { UCM_UNKNOWN, NULL }
 };
 
+struct acdb_init_data_v4 {
+    char*                   cvd_version;
+    char*                   snd_card_name;
+    struct listnode*        meta_key_list;
+    bool*                   is_instance_id_supported;
+};
+
 #define CVD_VERSION_MIXER_CTL           "CVD Version"
 #define MAX_CVD_VERSION_STRING_SIZE     100
 
@@ -142,6 +149,7 @@ static void alsaucm_test_cmd_svr(void)
     char ch;
     char *exit_str = "quit";
     char *cvd_version = NULL;
+    struct acdb_init_data_v4 init_data;
 
     cvd_version = calloc(1, MAX_CVD_VERSION_STRING_SIZE);
     if (!cvd_version)
@@ -149,7 +157,12 @@ static void alsaucm_test_cmd_svr(void)
     else
         get_cvd_version(cvd_version);
 
-    if ((acdb_loader_init_v2(NULL, cvd_version, 0)) < 0) {
+    init_data.snd_card_name = NULL;
+    init_data.cvd_version = cvd_version;
+    init_data.meta_key_list = NULL;
+    init_data.is_instance_id_supported = NULL;
+
+    if ((acdb_loader_init_v4(&init_data, 4)) < 0) {
         fprintf(stderr, "Failed to initialize ACDB\n");
         if (cvd_version)
             free(cvd_version);
