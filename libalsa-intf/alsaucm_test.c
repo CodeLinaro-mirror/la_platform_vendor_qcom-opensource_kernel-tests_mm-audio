@@ -25,6 +25,9 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <sys/ioctl.h>
@@ -141,6 +144,13 @@ done:
        return;
 }
 
+static void send_instance_id_supported(void)
+{
+    system("amix 'Instance ID Support' 1");
+
+    return;
+}
+
 static void alsaucm_test_cmd_svr(void)
 {
     int fd;
@@ -149,6 +159,7 @@ static void alsaucm_test_cmd_svr(void)
     char ch;
     char *exit_str = "quit";
     char *cvd_version = NULL;
+    bool is_instance_id_supported = 1;
     struct acdb_init_data_v4 init_data;
 
     cvd_version = calloc(1, MAX_CVD_VERSION_STRING_SIZE);
@@ -160,7 +171,7 @@ static void alsaucm_test_cmd_svr(void)
     init_data.snd_card_name = NULL;
     init_data.cvd_version = cvd_version;
     init_data.meta_key_list = NULL;
-    init_data.is_instance_id_supported = NULL;
+    init_data.is_instance_id_supported = &is_instance_id_supported;
 
     if ((acdb_loader_init_v4(&init_data, 4)) < 0) {
         fprintf(stderr, "Failed to initialize ACDB\n");
@@ -170,6 +181,9 @@ static void alsaucm_test_cmd_svr(void)
     }
     if (cvd_version)
         free(cvd_version);
+
+    if (is_instance_id_supported)
+        send_instance_id_supported();
 
     if (mknod("/data/alsaucm_test", S_IFIFO | 0666, 0) == 0) {
         fd = open("/data/alsaucm_test", O_RDONLY);
