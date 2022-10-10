@@ -13,6 +13,9 @@
 ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
+*
+* Changes from Qualcomm Innovation Center are provided under the following license:
+* Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
 */
 
 #define LOG_TAG "alsa_pcm"
@@ -139,7 +142,6 @@ enum decoder_alias {
     FORMAT_AAC              = SND_AUDIOCODEC_AAC,
     FORMAT_AC3_PASS_THROUGH = SND_AUDIOCODEC_AC3_PASS_THROUGH,
     FORMAT_WMA              = SND_AUDIOCODEC_WMA,
-    FORMAT_WMA_PRO          = SND_AUDIOCODEC_WMA_PRO,
     FORMAT_DTS              = SND_AUDIOCODEC_DTS,
     FORMAT_DTS_LBR          = SND_AUDIOCODEC_DTS_LBR,
     FORMAT_DTS_PASS_THROUGH = SND_AUDIOCODEC_DTS_PASS_THROUGH,
@@ -171,9 +173,6 @@ int get_compressed_format(const char *format)
         } else if (strcmp(ch, "WMA") == 0) {
                 printf("WMA is selected\n");
                 return FORMAT_WMA;
-        }else if (strcmp(ch, "WMA_PRO") == 0) {
-                printf("WMA_PRO is selected\n");
-                return FORMAT_WMA_PRO;
         }else if (strcmp(ch, "DTS") == 0) {
                 printf("DTS is selected\n");
                 return FORMAT_DTS;

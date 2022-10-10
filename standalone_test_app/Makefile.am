@@ -8,7 +8,7 @@ amrnbtest_INCLUDES = -I$(WORKSPACE)/system/core/libion/include/
 
 amrnbtest_SOURCES = amrnbtest.c ion_alloc.c
 
-amrnbtest_LDFLAGS   = -lpthread -lm -shared -lutils -lion
+amrnbtest_LDFLAGS   = -lpthread -lm -shared -lion
 
 amrnbtest_CFLAGS = $(amrnb_CPPFLAGS) $(amrnbtest_INCLUDES)
 
@@ -23,7 +23,7 @@ amrwbtest_INCLUDES = -I$(WORKSPACE)/system/core/libion/include/
 
 amrwbtest_SOURCES = amrwbtest.c ion_alloc.c
 
-amrwbtest_LDFLAGS   = -lpthread -lm -shared -lutils -lion
+amrwbtest_LDFLAGS   = -lpthread -lm -shared -lion
 
 amrwbtest_CFLAGS = $(amrwb_CPPFLAGS) $(amrwbtest_INCLUDES)
 
@@ -38,7 +38,7 @@ amrwbplustest_INCLUDES = -I$(WORKSPACE)/system/core/libion/include/
 
 amrwbplustest_SOURCES = amrwbplustest.c ion_alloc.c
 
-amrwbplustest_LDFLAGS   = -lpthread -lm -shared -lutils -lion
+amrwbplustest_LDFLAGS   = -lpthread -lm -shared -lion
 
 amrwbplustest_CFLAGS = $(amrwbplus_CPPFLAGS) $(amrwbplustest_INCLUDES)
 
