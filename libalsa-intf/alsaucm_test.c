@@ -25,6 +25,9 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Changes from Qualcomm Innovation Center are provided under the following license:
+ * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <sys/ioctl.h>
@@ -91,6 +94,15 @@ static struct cmd cmds[] = {
     { UCM_UNKNOWN, NULL }
 };
 
+#ifdef ENABLE_ALSAUCM_ACDBV4
+struct acdb_init_data_v4 {
+	char*                   cvd_version;
+	char*                   snd_card_name;
+	struct listnode*        meta_key_list;
+	bool*                   is_instance_id_supported;
+};
+#endif
+
 #define CVD_VERSION_MIXER_CTL           "CVD Version"
 #define MAX_CVD_VERSION_STRING_SIZE     100
 
@@ -134,6 +146,15 @@ done:
        return;
 }
 
+#ifdef ENABLE_ALSAUCM_ACDBV4
+static void send_instance_id_supported(void)
+{
+    system("amix 'Instance ID Support' 1");
+
+    return;
+}
+#endif
+
 static void alsaucm_test_cmd_svr(void)
 {
     int fd;
@@ -142,6 +163,10 @@ static void alsaucm_test_cmd_svr(void)
     char ch;
     char *exit_str = "quit";
     char *cvd_version = NULL;
+    #ifdef ENABLE_ALSAUCM_ACDBV4
+    bool is_instance_id_supported = 1;
+    struct acdb_init_data_v4 init_data;
+    #endif
 
     cvd_version = calloc(1, MAX_CVD_VERSION_STRING_SIZE);
     if (!cvd_version)
@@ -149,14 +174,34 @@ static void alsaucm_test_cmd_svr(void)
     else
         get_cvd_version(cvd_version);
 
+    #ifdef ENABLE_ALSAUCM_ACDBV4
+    init_data.snd_card_name = NULL;
+    init_data.cvd_version = cvd_version;
+    init_data.meta_key_list = NULL;
+    init_data.is_instance_id_supported = &is_instance_id_supported;
+
+    if ((acdb_loader_init_v4(&init_data, 4)) < 0) {
+        fprintf(stderr, "Failed to initialize ACDB\n");
+        if (cvd_version)
+            free(cvd_version);
+        return 0;
+    }
+    #else
     if ((acdb_loader_init_v2(NULL, cvd_version, 0)) < 0) {
         fprintf(stderr, "Failed to initialize ACDB\n");
         if (cvd_version)
             free(cvd_version);
         return 0;
     }
+    #endif
+
     if (cvd_version)
         free(cvd_version);
+
+    #ifdef ENABLE_ALSAUCM_ACDBV4
+    if (is_instance_id_supported)
+        send_instance_id_supported();
+    #endif
 
     if (mknod("/data/alsaucm_test", S_IFIFO | 0666, 0) == 0) {
         fd = open("/data/alsaucm_test", O_RDONLY);
