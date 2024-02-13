@@ -73,6 +73,12 @@ struct pcm {
 #define PCM_PERIOD_SZ_MASK (0xF << PCM_PERIOD_SZ_SHIFT)
 
 #define TIMEOUT_INFINITE  -1
+#define SND_AUDIOCODEC_AC3_PASS_THROUGH      ((__u32) 0x00001009)
+#define SND_AUDIOCODEC_DTS                   ((__u32) 0x00000017)
+#define SND_AUDIOCODEC_DTS_LBR               ((__u32) 0x0000000F)
+#define SND_AUDIOCODEC_DTS_PASS_THROUGH      ((__u32) 0x0000000E)
+#define SNDRV_CTL_ELEM_ACCESS_TIMESTAMP            (1<<3)  /* when was control changed */
+#define SND_AUDIOCODEC_WMA_PRO               ((__u32) 0x00000016)
 
 /* Acquire/release a pcm channel.
  * Returns non-zero on error
