@@ -451,8 +451,6 @@ static int play_file(unsigned rate, unsigned channels, int fd,
                     struct snd_compr_tstamp tstamp;
         if (ioctl(pcm->fd, SNDRV_COMPRESS_TSTAMP, &tstamp))
       fprintf(stderr, "Aplay: failed SNDRV_COMPRESS_TSTAMP\n");
-                    else
-                  fprintf(stderr, "timestamp = %lld\n", tstamp.timestamp);
     }
              }
              /*
